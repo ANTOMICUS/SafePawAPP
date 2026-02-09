@@ -1,0 +1,142 @@
+package com.safepaw.app.ui.screens
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.safepaw.app.data.models.Animal
+import com.safepaw.app.ui.viewmodels.AnimalViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AnimalDetailScreen(
+    animal: Animal,
+    viewModel: AnimalViewModel,
+    onBack: () -> Unit
+) {
+    var isEditing by remember { mutableStateOf(false) }
+    
+    // Estados locales para edición
+    var nombre by remember { mutableStateOf(animal.nombre) }
+    var especie by remember { mutableStateOf(animal.especie) }
+    var estado by remember { mutableStateOf(animal.estado_adopcion) }
+    var microchip by remember { mutableStateOf(animal.microchip) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(if (isEditing) "Editar Animal" else "Ficha Técnica") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+                actions = {
+                    if (isEditing) {
+                        IconButton(onClick = {
+                            val updatedAnimal = animal.copy(
+                                nombre = nombre,
+                                especie = especie,
+                                estado_adopcion = estado,
+                                microchip = microchip
+                            )
+                            viewModel.upsertAnimal(updatedAnimal)
+                            isEditing = false
+                        }) {
+                            Icon(Icons.Default.Save, contentDescription = "Guardar")
+                        }
+                    } else {
+                        IconButton(onClick = { isEditing = true }) {
+                            Icon(Icons.Default.Edit, contentDescription = "Editar")
+                        }
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            DetailField(label = "Nombre", value = nombre, isEditing = isEditing, onValueChange = { nombre = it })
+            DetailField(label = "Especie", value = especie, isEditing = isEditing, onValueChange = { especie = it })
+            DetailField(label = "Microchip", value = microchip, isEditing = isEditing, onValueChange = { microchip = it })
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text("Estado de Adopción", style = MaterialTheme.typography.labelLarge)
+            if (isEditing) {
+                // Simplificado: En una app real usaríamos un DropdownMenu
+                OutlinedTextField(
+                    value = estado,
+                    onValueChange = { estado = it },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    ),
+                    modifier = Modifier.padding(vertical = 8.dp)
+                ) {
+                    Text(
+                        text = estado,
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Divider()
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text("Historial Médico", style = MaterialTheme.typography.headlineSmall)
+            
+            // Aquí se integrará el componente de Historial Médico en el siguiente paso
+            Button(
+                onClick = { /* Navegar a historial completo */ },
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                Text("Ver Tratamientos")
+            }
+        }
+    }
+}
+
+@Composable
+fun DetailField(
+    label: String,
+    value: String,
+    isEditing: Boolean,
+    onValueChange: (String) -> Unit
+) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Text(text = label, style = MaterialTheme.typography.labelLarge)
+        if (isEditing) {
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}

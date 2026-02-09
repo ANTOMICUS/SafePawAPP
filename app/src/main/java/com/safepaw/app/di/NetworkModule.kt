@@ -19,8 +19,8 @@ object NetworkModule {
     @Singleton
     fun provideSupabaseClient(): SupabaseClient {
         return createSupabaseClient(
-            supabaseUrl = "https://TU_PROYECTO.supabase.co",
-            supabaseKey = "TU_ANON_KEY"
+            supabaseUrl = "https://eiicceqdkngrynzvohyo.supabase.co",
+            supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpaWNjZXFka25ncnluenZvaHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA2MjkxODEsImV4cCI6MjA4NjIwNTE4MX0.7kNwLkGo9M_W40Wnc6FdSjp-KShDbE7OehaxTKKgb38"
         ) {
             install(Postgrest)
             install(GoTrue)
