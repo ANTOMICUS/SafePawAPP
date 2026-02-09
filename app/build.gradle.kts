@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -39,6 +38,10 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    composeOptions {
+        // Para Kotlin 1.9.22, necesitamos especificar la versión del compilador de Compose
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
 }
 
