@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
@@ -40,7 +41,6 @@ android {
         compose = true
     }
     composeOptions {
-        // Para Kotlin 1.9.22, necesitamos especificar la versión del compilador de Compose
         kotlinCompilerExtensionVersion = "1.5.10"
     }
 }
@@ -56,10 +56,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     
     // Supabase
-    implementation(platform("io.github.jan-tennert.supabase:bom:2.5.0"))
-    implementation("io.github.jan-tennert.supabase:postgrest-kt")
-    implementation("io.github.jan-tennert.supabase:gotrue-kt")
-    implementation("io.github.jan-tennert.supabase:storage-kt")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.5.0")
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.5.0")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.5.0")
     implementation("io.ktor:ktor-client-android:2.3.7")
 
     // Serialization
