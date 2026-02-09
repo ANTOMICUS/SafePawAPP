@@ -52,6 +52,7 @@ dependencies {
     // SUPABASE
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.5.0")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.5.0")
+    implementation("io.github.jan-tennert.supabase:storage-kt:2.5.0")
     
     // KTOR (Versión fija para estabilidad)
     implementation("io.ktor:ktor-client-android:2.3.12")
