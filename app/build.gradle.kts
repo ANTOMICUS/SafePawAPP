@@ -29,17 +29,16 @@ android {
 }
 
 dependencies {
-    // Compose
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation(platform("androidx.compose:compose-bom:2024.02.00"))
+    // Jetpack Compose
+    val composeBom = platform("androidx.compose:compose-bom:2024.02.00")
+    implementation(composeBom)
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.activity:activity-compose:1.8.2")
 
-    // SUPABASE (Solo lo necesario)
+    // SUPABASE & KTOR (Versiones fijas para evitar el error de mutación)
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.5.0")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.5.0")
-    
-    // KTOR (Motor de red fijo para evitar el error de mutación)
     implementation("io.ktor:ktor-client-android:2.3.12")
     implementation("io.ktor:ktor-client-core:2.3.12")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
