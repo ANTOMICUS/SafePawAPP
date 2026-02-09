@@ -16,25 +16,21 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -45,7 +41,7 @@ android {
 }
 
 dependencies {
-    // Core Android & Compose
+    // Core Android & Compose (Usando el catálogo de versiones libs)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -55,18 +51,15 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     
-    // Supabase - Usando versiones que no causan conflictos con Ktor
+    // Supabase - Versiones fijas y probadas
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.5.0")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.5.0")
     implementation("io.github.jan-tennert.supabase:storage-kt:2.5.0")
     
-    // Forzamos Ktor a una versión específica de forma global para evitar mutaciones
-    constraints {
-        implementation("io.ktor:ktor-client-core:2.3.12")
-        implementation("io.ktor:ktor-client-android:2.3.12")
-        implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
-        implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
-    }
+    // Ktor - Forzamos una única versión para evitar el error de mutación
+    val ktor_version = "2.3.12"
+    implementation("io.ktor:ktor-client-android:$ktor_version")
+    implementation("io.ktor:ktor-client-core:$ktor_version")
 
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
