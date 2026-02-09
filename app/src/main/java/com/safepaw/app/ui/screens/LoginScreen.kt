@@ -9,6 +9,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.safepaw.app.ui.viewmodels.AuthViewModel
+import com.safepaw.app.ui.viewmodels.AuthState
 
 @Composable
 fun LoginScreen(
