@@ -45,6 +45,7 @@ android {
 }
 
 dependencies {
+    // Core Android & Compose (Usando el catálogo de versiones libs)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -54,14 +55,14 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     
-    // Supabase
+    // Supabase - Versiones fijas sin BOM para evitar conflictos de mutación
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.5.0")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.5.0")
     implementation("io.github.jan-tennert.supabase:storage-kt:2.5.0")
-    implementation("io.ktor:ktor-client-android:2.3.7")
+    implementation("io.ktor:ktor-client-android:2.3.12")
 
     // Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.50")
