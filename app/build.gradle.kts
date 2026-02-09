@@ -2,9 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("kotlinx-serialization") version "1.9.22"
-    id("com.google.dagger.hilt.android") version "2.50"
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
