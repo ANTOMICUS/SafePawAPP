@@ -82,12 +82,44 @@ class AnimalViewModel @Inject constructor(
     fun upsertAnimal(animal: Animal) {
         viewModelScope.launch {
             try {
-                // Lógica simple: si existe id_animal y ya está en la lista, update, si no insert
-                // En un caso real, se verificaría contra la DB
-                repository.insertAnimal(animal) // O updateAnimal
+                repository.insertAnimal(animal)
                 fetchAnimales()
             } catch (e: Exception) {
                 _uiState.value = AnimalUiState.Error("Error al guardar animal")
+            }
+        }
+    }
+
+    fun addTratamiento(tratamiento: Tratamiento) {
+        viewModelScope.launch {
+            try {
+                repository.insertTratamiento(tratamiento)
+                fetchTratamientos(tratamiento.id_animal)
+            } catch (e: Exception) {
+                // Manejar error
+            }
+        }
+    }
+
+    fun uploadPhoto(idAnimal: String, bytes: ByteArray, onComplete: (String) -> Unit) {
+        viewModelScope.launch {
+            try {
+                val url = repository.uploadAnimalPhoto(idAnimal, bytes)
+                onComplete(url)
+            } catch (e: Exception) {
+                // Manejar error
+            }
+        }
+    }
+
+    fun filterAnimales(query: String?, especie: String?, estado: String?) {
+        viewModelScope.launch {
+            _uiState.value = AnimalUiState.Loading
+            try {
+                val lista = repository.searchAnimales(query, especie, estado)
+                _uiState.value = AnimalUiState.Success(lista)
+            } catch (e: Exception) {
+                _uiState.value = AnimalUiState.Error(e.message ?: "Error en el filtrado")
             }
         }
     }

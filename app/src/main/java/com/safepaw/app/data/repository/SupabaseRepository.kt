@@ -62,4 +62,32 @@ class SupabaseRepository @Inject constructor(
     suspend fun insertTratamiento(tratamiento: Tratamiento) = withContext(Dispatchers.IO) {
         supabaseClient.postgrest["tratamientos"].insert(tratamiento)
     }
+
+    // --- Imágenes ---
+    suspend fun uploadAnimalPhoto(idAnimal: String, bytes: ByteArray): String = withContext(Dispatchers.IO) {
+        val fileName = "$idAnimal.jpg"
+        val bucket = supabaseClient.storage["animal-photos"]
+        bucket.upload(fileName, bytes, upsert = true)
+        bucket.publicUrl(fileName)
+    }
+
+    suspend fun searchAnimales(
+        query: String? = null,
+        especie: String? = null,
+        estado: String? = null
+    ): List<Animal> = withContext(Dispatchers.IO) {
+        supabaseClient.postgrest["animales"].select {
+            filter {
+                if (!query.isNullOrBlank()) {
+                    or {
+                        ilike("nombre", "%$query%")
+                        ilike("microchip", "%$query%")
+                        ilike("raza", "%$query%")
+                    }
+                }
+                if (!especie.isNullOrBlank() && especie != "Todos") eq("especie", especie)
+                if (!estado.isNullOrBlank() && estado != "Todos") eq("estado_adopcion", estado)
+            }
+        }.decodeList<Animal>()
+    }
 }

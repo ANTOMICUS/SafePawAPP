@@ -13,15 +13,18 @@ data class Animal(
     val peso: Double = 0.0,
     val edad: Int = 0,
     val vacunas_al_dia: Boolean = false,
-    val estado_adopcion: String
+    val estado_adopcion: String,
+    val foto_url: String? = null
 )
 
 @Serializable
 data class Tratamiento(
     val id_tratamiento: String = UUID.randomUUID().toString(),
     val id_animal: String,
-    val tipo: String,
-    val fecha: String // ISO 8601
+    val tipo: String, // Tratamiento o Intervención
+    val descripcion: String = "",
+    val fecha: String, // ISO 8601
+    val duracion: String = "" // Ej: "7 días", "2 horas"
 )
 
 @Serializable

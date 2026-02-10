@@ -2,15 +2,18 @@ package com.safepaw.app.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.safepaw.app.data.models.Animal
 import com.safepaw.app.ui.viewmodels.AnimalViewModel
 
@@ -32,6 +35,7 @@ fun AnimalDetailScreen(
     var vacunasAlDia by remember { mutableStateOf(animal.vacunas_al_dia) }
     var estado by remember { mutableStateOf(animal.estado_adopcion) }
     var microchip by remember { mutableStateOf(animal.microchip) }
+    var fotoUrl by remember { mutableStateOf(animal.foto_url) }
 
     Scaffold(
         topBar = {
@@ -53,7 +57,8 @@ fun AnimalDetailScreen(
                                 edad = edad.toIntOrNull() ?: 0,
                                 vacunas_al_dia = vacunasAlDia,
                                 estado_adopcion = estado,
-                                microchip = microchip
+                                microchip = microchip,
+                                foto_url = fotoUrl
                             )
                             viewModel.upsertAnimal(updatedAnimal)
                             isEditing = false
@@ -74,8 +79,48 @@ fun AnimalDetailScreen(
                 .padding(padding)
                 .padding(16.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Foto de Perfil
+            Box(
+                modifier = Modifier
+                    .size(150.dp)
+                    .clip(CircleShape)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (fotoUrl != null) {
+                    AsyncImage(
+                        model = fotoUrl,
+                        contentDescription = "Foto de $nombre",
+                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Pets,
+                        contentDescription = null,
+                        modifier = Modifier.size(80.dp),
+                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                    )
+                }
+                
+                if (isEditing) {
+                    IconButton(
+                        onClick = { /* Implementar selector de imagen */ },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .clip(CircleShape)
+                            .padding(4.dp)
+                    ) {
+                        Icon(Icons.Default.PhotoCamera, contentDescription = "Cambiar foto")
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             DetailField(label = "Nombre", value = nombre, isEditing = isEditing, onValueChange = { nombre = it })
             DetailField(label = "Especie", value = especie, isEditing = isEditing, onValueChange = { especie = it })
             DetailField(label = "Raza", value = raza, isEditing = isEditing, onValueChange = { raza = it })

@@ -67,4 +67,7 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
     implementation("androidx.camera:camera-view:$cameraxVersion")
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
+
+    // Coil para carga de imágenes
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }

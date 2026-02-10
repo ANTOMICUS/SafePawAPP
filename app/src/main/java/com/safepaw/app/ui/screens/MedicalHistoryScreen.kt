@@ -4,9 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.MedicalServices
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -69,8 +67,15 @@ fun MedicalHistoryScreen(
         if (showAddDialog) {
             AddTreatmentDialog(
                 onDismiss = { showAddDialog = false },
-                onConfirm = { tipo ->
-                    // Aquí se llamaría a viewModel.addTratamiento(idAnimal, tipo)
+                onConfirm = { tipo, descripcion, duracion ->
+                    val nuevoTratamiento = Tratamiento(
+                        id_animal = idAnimal,
+                        tipo = tipo,
+                        descripcion = descripcion,
+                        fecha = java.time.LocalDateTime.now().toString(),
+                        duracion = duracion
+                    )
+                    viewModel.addTratamiento(nuevoTratamiento)
                     showAddDialog = false
                 }
             )
@@ -84,36 +89,65 @@ fun TreatmentItem(tratamiento: Tratamiento) {
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Default.MedicalServices, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.width(16.dp))
-            Column {
-                Text(text = tratamiento.tipo, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
-                Text(text = "Fecha: ${tratamiento.fecha}", style = MaterialTheme.typography.bodyMedium)
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    if (tratamiento.tipo == "Intervención") Icons.Default.MedicalInformation else Icons.Default.MedicalServices,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(text = tratamiento.tipo, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                    Text(text = "Fecha: ${tratamiento.fecha.take(10)}", style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+            if (tratamiento.descripcion.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = tratamiento.descripcion, style = MaterialTheme.typography.bodyMedium)
+            }
+            if (tratamiento.duracion.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Duración: ${tratamiento.duracion}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
             }
         }
     }
 }
 
 @Composable
-fun AddTreatmentDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
-    var tipo by remember { mutableStateOf("") }
+fun AddTreatmentDialog(onDismiss: () -> Unit, onConfirm: (String, String, String) -> Unit) {
+    var tipo by remember { mutableStateOf("Tratamiento") }
+    var descripcion by remember { mutableStateOf("") }
+    var duracion by remember { mutableStateOf("") }
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nuevo Tratamiento") },
+        title = { Text("Nuevo Registro Médico") },
         text = {
-            OutlinedTextField(
-                value = tipo,
-                onValueChange = { tipo = it },
-                label = { Text("Descripción del tratamiento") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = tipo == "Tratamiento", onClick = { tipo = "Tratamiento" })
+                    Text("Tratamiento")
+                    Spacer(modifier = Modifier.width(16.dp))
+                    RadioButton(selected = tipo == "Intervención", onClick = { tipo = "Intervención" })
+                    Text("Intervención")
+                }
+                OutlinedTextField(
+                    value = descripcion,
+                    onValueChange = { descripcion = it },
+                    label = { Text("Descripción") },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                )
+                OutlinedTextField(
+                    value = duracion,
+                    onValueChange = { duracion = it },
+                    label = { Text("Duración (ej: 7 días, 2h)") },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                )
+            }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(tipo) }, enabled = tipo.isNotBlank()) {
+            Button(onClick = { onConfirm(tipo, descripcion, duracion) }, enabled = descripcion.isNotBlank()) {
                 Text("Añadir")
             }
         },
