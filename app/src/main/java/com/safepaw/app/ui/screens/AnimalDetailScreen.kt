@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.safepaw.app.data.models.Animal
+import com.safepaw.app.ui.navigation.Screen
 import com.safepaw.app.ui.viewmodels.AnimalViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
