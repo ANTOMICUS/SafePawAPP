@@ -14,6 +14,7 @@ sealed class Screen(val route: String) {
     object Login : Screen("login")
     object Dashboard : Screen("dashboard")
     object Scanner : Screen("scanner")
+    object AnimalAdd : Screen("animal_add")
     object AnimalDetail : Screen("animal_detail/{microchip}") {
         fun createRoute(microchip: String) = "animal_detail/$microchip"
     }
@@ -52,6 +53,20 @@ fun SafePawNavigation(
                 },
                 onScanClick = {
                     navController.navigate(Screen.Scanner.route)
+                },
+                onAddClick = {
+                    navController.navigate(Screen.AnimalAdd.route)
+                }
+            )
+        }
+
+        // 2.5 Añadir Animal
+        composable(Screen.AnimalAdd.route) {
+            AnimalAddScreen(
+                viewModel = animalViewModel,
+                onBack = { navController.popBackStack() },
+                onSuccess = {
+                    navController.popBackStack()
                 }
             )
         }

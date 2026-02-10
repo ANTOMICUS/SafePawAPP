@@ -3,8 +3,12 @@ package com.safepaw.app.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.safepaw.app.data.models.Animal
@@ -16,7 +20,8 @@ import com.safepaw.app.ui.viewmodels.AnimalViewModel
 fun DashboardScreen(
     viewModel: AnimalViewModel,
     onAnimalClick: (Animal) -> Unit,
-    onScanClick: () -> Unit
+    onScanClick: () -> Unit,
+    onAddClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -26,8 +31,16 @@ fun DashboardScreen(
             TopAppBar(title = { Text("SafePaw - Dashboard") })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onScanClick) {
-                Text("Scan")
+            Column(horizontalAlignment = Alignment.End) {
+                FloatingActionButton(
+                    onClick = onAddClick,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Añadir Manual")
+                }
+                FloatingActionButton(onClick = onScanClick) {
+                    Icon(Icons.Default.QrCodeScanner, contentDescription = "Escanear")
+                }
             }
         }
     ) { padding ->

@@ -26,6 +26,10 @@ fun AnimalDetailScreen(
     // Estados locales para edición
     var nombre by remember { mutableStateOf(animal.nombre) }
     var especie by remember { mutableStateOf(animal.especie) }
+    var raza by remember { mutableStateOf(animal.raza) }
+    var peso by remember { mutableStateOf(animal.peso.toString()) }
+    var edad by remember { mutableStateOf(animal.edad.toString()) }
+    var vacunasAlDia by remember { mutableStateOf(animal.vacunas_al_dia) }
     var estado by remember { mutableStateOf(animal.estado_adopcion) }
     var microchip by remember { mutableStateOf(animal.microchip) }
 
@@ -44,6 +48,10 @@ fun AnimalDetailScreen(
                             val updatedAnimal = animal.copy(
                                 nombre = nombre,
                                 especie = especie,
+                                raza = raza,
+                                peso = peso.toDoubleOrNull() ?: 0.0,
+                                edad = edad.toIntOrNull() ?: 0,
+                                vacunas_al_dia = vacunasAlDia,
                                 estado_adopcion = estado,
                                 microchip = microchip
                             )
@@ -70,6 +78,22 @@ fun AnimalDetailScreen(
         ) {
             DetailField(label = "Nombre", value = nombre, isEditing = isEditing, onValueChange = { nombre = it })
             DetailField(label = "Especie", value = especie, isEditing = isEditing, onValueChange = { especie = it })
+            DetailField(label = "Raza", value = raza, isEditing = isEditing, onValueChange = { raza = it })
+            DetailField(label = "Peso (kg)", value = peso, isEditing = isEditing, onValueChange = { peso = it })
+            DetailField(label = "Edad", value = edad, isEditing = isEditing, onValueChange = { edad = it })
+            
+            Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Text("Vacunas al día", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
+                if (isEditing) {
+                    Switch(checked = vacunasAlDia, onCheckedChange = { vacunasAlDia = it })
+                } else {
+                    Text(if (vacunasAlDia) "Sí" else "No", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+
             DetailField(label = "Microchip", value = microchip, isEditing = isEditing, onValueChange = { microchip = it })
             
             Spacer(modifier = Modifier.height(16.dp))

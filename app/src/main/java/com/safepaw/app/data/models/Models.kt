@@ -9,6 +9,10 @@ data class Animal(
     val microchip: String,
     val nombre: String,
     val especie: String,
+    val raza: String = "",
+    val peso: Double = 0.0,
+    val edad: Int = 0,
+    val vacunas_al_dia: Boolean = false,
     val estado_adopcion: String
 )
 
