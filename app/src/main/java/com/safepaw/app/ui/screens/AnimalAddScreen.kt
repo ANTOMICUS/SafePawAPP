@@ -1,16 +1,26 @@
 package com.safepaw.app.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.safepaw.app.data.models.Animal
 import com.safepaw.app.ui.viewmodels.AnimalViewModel
 
@@ -21,6 +31,7 @@ fun AnimalAddScreen(
     onBack: () -> Unit,
     onSuccess: () -> Unit
 ) {
+    val context = LocalContext.current
     var nombre by remember { mutableStateOf("") }
     var especie by remember { mutableStateOf("") }
     var raza by remember { mutableStateOf("") }
@@ -29,6 +40,56 @@ fun AnimalAddScreen(
     var vacunasAlDia by remember { mutableStateOf(false) }
     var microchip by remember { mutableStateOf("") }
     var estado by remember { mutableStateOf("Disponible") }
+    var imageUri by remember { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri = uri
+    }
+
+    fun saveAnimal() {
+        if (nombre.isNotBlank() && microchip.isNotBlank()) {
+            val animalId = java.util.UUID.randomUUID().toString()
+            
+            if (imageUri != null) {
+                val inputStream = context.contentResolver.openInputStream(imageUri!!)
+                val bytes = inputStream?.readBytes()
+                if (bytes != null) {
+                    viewModel.uploadPhoto(animalId, bytes) { url ->
+                        val newAnimal = Animal(
+                            id_animal = animalId,
+                            nombre = nombre,
+                            especie = especie,
+                            raza = raza,
+                            peso = peso.toDoubleOrNull() ?: 0.0,
+                            edad = edad.toIntOrNull() ?: 0,
+                            vacunas_al_dia = vacunasAlDia,
+                            microchip = microchip,
+                            estado_adopcion = estado,
+                            foto_url = url
+                        )
+                        viewModel.upsertAnimal(newAnimal)
+                        onSuccess()
+                    }
+                }
+            } else {
+                val newAnimal = Animal(
+                    id_animal = animalId,
+                    nombre = nombre,
+                    especie = especie,
+                    raza = raza,
+                    peso = peso.toDoubleOrNull() ?: 0.0,
+                    edad = edad.toIntOrNull() ?: 0,
+                    vacunas_al_dia = vacunasAlDia,
+                    microchip = microchip,
+                    estado_adopcion = estado
+                )
+                viewModel.upsertAnimal(newAnimal)
+                onSuccess()
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -40,22 +101,7 @@ fun AnimalAddScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        if (nombre.isNotBlank() && microchip.isNotBlank()) {
-                            val newAnimal = Animal(
-                                nombre = nombre,
-                                especie = especie,
-                                raza = raza,
-                                peso = peso.toDoubleOrNull() ?: 0.0,
-                                edad = edad.toIntOrNull() ?: 0,
-                                vacunas_al_dia = vacunasAlDia,
-                                microchip = microchip,
-                                estado_adopcion = estado
-                            )
-                            viewModel.upsertAnimal(newAnimal)
-                            onSuccess()
-                        }
-                    }) {
+                    IconButton(onClick = { saveAnimal() }) {
                         Icon(Icons.Default.Save, contentDescription = "Guardar")
                     }
                 }
@@ -67,8 +113,52 @@ fun AnimalAddScreen(
                 .padding(padding)
                 .padding(16.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Selector de Imagen
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (imageUri != null) {
+                    AsyncImage(
+                        model = imageUri,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            Icons.Default.Pets,
+                            contentDescription = null,
+                            modifier = Modifier.padding(24.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                IconButton(
+                    onClick = { galleryLauncher.launch("image/*") },
+                    modifier = Modifier.align(Alignment.BottomEnd)
+                ) {
+                    Icon(
+                        Icons.Default.PhotoCamera,
+                        contentDescription = "Seleccionar foto",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = nombre,
                 onValueChange = { nombre = it },
@@ -124,22 +214,7 @@ fun AnimalAddScreen(
             Spacer(modifier = Modifier.height(24.dp))
             
             Button(
-                onClick = {
-                    if (nombre.isNotBlank() && microchip.isNotBlank()) {
-                        val newAnimal = Animal(
-                            nombre = nombre,
-                            especie = especie,
-                            raza = raza,
-                            peso = peso.toDoubleOrNull() ?: 0.0,
-                            edad = edad.toIntOrNull() ?: 0,
-                            vacunas_al_dia = vacunasAlDia,
-                            microchip = microchip,
-                            estado_adopcion = estado
-                        )
-                        viewModel.upsertAnimal(newAnimal)
-                        onSuccess()
-                    }
-                },
+                onClick = { saveAnimal() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Registrar Animal")

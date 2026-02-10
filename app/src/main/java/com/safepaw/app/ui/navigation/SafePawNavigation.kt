@@ -95,6 +95,7 @@ fun SafePawNavigation(
                 AnimalDetailScreen(
                     animal = animal,
                     viewModel = animalViewModel,
+                    navController = navController,
                     onBack = { navController.popBackStack() }
                 )
             } else {

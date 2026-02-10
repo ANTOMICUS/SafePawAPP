@@ -22,8 +22,10 @@ import com.safepaw.app.ui.viewmodels.AnimalViewModel
 fun AnimalDetailScreen(
     animal: Animal,
     viewModel: AnimalViewModel,
+    navController: androidx.navigation.NavController,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     var isEditing by remember { mutableStateOf(false) }
     
     // Estados locales para edición
@@ -36,6 +38,20 @@ fun AnimalDetailScreen(
     var estado by remember { mutableStateOf(animal.estado_adopcion) }
     var microchip by remember { mutableStateOf(animal.microchip) }
     var fotoUrl by remember { mutableStateOf(animal.foto_url) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            val inputStream = context.contentResolver.openInputStream(it)
+            val bytes = inputStream?.readBytes()
+            if (bytes != null) {
+                viewModel.uploadPhoto(animal.id_animal, bytes) { newUrl ->
+                    fotoUrl = newUrl
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -108,7 +124,7 @@ fun AnimalDetailScreen(
                 
                 if (isEditing) {
                     IconButton(
-                        onClick = { /* Implementar selector de imagen */ },
+                        onClick = { galleryLauncher.launch("image/*") },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .clip(CircleShape)
@@ -140,12 +156,11 @@ fun AnimalDetailScreen(
             }
 
             DetailField(label = "Microchip", value = microchip, isEditing = isEditing, onValueChange = { microchip = it })
-            
+
             Spacer(modifier = Modifier.height(16.dp))
             
             Text("Estado de Adopción", style = MaterialTheme.typography.labelLarge)
             if (isEditing) {
-                // Simplificado: En una app real usaríamos un DropdownMenu
                 OutlinedTextField(
                     value = estado,
                     onValueChange = { estado = it },
@@ -174,12 +189,13 @@ fun AnimalDetailScreen(
             
             Text("Historial Médico", style = MaterialTheme.typography.headlineSmall)
             
-            // Aquí se integrará el componente de Historial Médico en el siguiente paso
             Button(
-                onClick = { /* Navegar a historial completo */ },
+                onClick = { 
+                    navController.navigate(Screen.MedicalHistory.createRoute(animal.id_animal, animal.nombre))
+                },
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                Text("Ver Tratamientos")
+                Text("Ver / Editar Historial Médico")
             }
         }
     }
