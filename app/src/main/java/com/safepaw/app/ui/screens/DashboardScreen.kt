@@ -200,6 +200,11 @@ fun FilterDialog(
     )
 }
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+
 @Composable
 fun AnimalList(animales: List<Animal>, onAnimalClick: (Animal) -> Unit) {
     LazyColumn {
@@ -208,11 +213,43 @@ fun AnimalList(animales: List<Animal>, onAnimalClick: (Animal) -> Unit) {
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
                 onClick = { onAnimalClick(animal) }
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(text = animal.nombre, style = MaterialTheme.typography.headlineSmall)
-                    Text(text = "Especie: ${animal.especie}")
-                    Text(text = "Microchip: ${animal.microchip}")
-                    Text(text = "Estado: ${animal.estado_adopcion}")
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Imagen de perfil en la lista
+                    if (animal.foto_url != null) {
+                        AsyncImage(
+                            model = animal.foto_url,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Surface(
+                            modifier = Modifier.size(60.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Icon(
+                                Icons.Default.Pets,
+                                contentDescription = null,
+                                modifier = Modifier.padding(12.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.width(16.dp))
+                    
+                    Column {
+                        Text(text = animal.nombre, style = MaterialTheme.typography.headlineSmall)
+                        Text(text = "Especie: ${animal.especie}")
+                        Text(text = "Microchip: ${animal.microchip}")
+                        Text(text = "Estado: ${animal.estado_adopcion}")
+                    }
                 }
             }
         }
