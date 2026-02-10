@@ -74,9 +74,19 @@ fun SafePawNavigation(
             arguments = listOf(navArgument("microchip") { type = NavType.StringType })
         ) { backStackEntry ->
             val microchip = backStackEntry.arguments?.getString("microchip") ?: ""
-            // En una implementación real, aquí buscaríamos el animal en el ViewModel
-            // por simplicidad pasamos un placeholder o disparamos la búsqueda
-            // AnimalDetailScreen(...)
+            val animal = animalViewModel.getAnimalByMicrochipFromList(microchip)
+            
+            if (animal != null) {
+                AnimalDetailScreen(
+                    animal = animal,
+                    viewModel = animalViewModel,
+                    onBack = { navController.popBackStack() }
+                )
+            } else {
+                // Si no se encuentra (ej. por escaneo directo), se podría disparar una búsqueda
+                // Por ahora volvemos atrás o mostramos error
+                navController.popBackStack()
+            }
         }
 
         // 5. Historial Médico

@@ -61,6 +61,13 @@ class AnimalViewModel @Inject constructor(
         }
     }
 
+    fun getAnimalByMicrochipFromList(microchip: String): Animal? {
+        val state = _uiState.value
+        return if (state is AnimalUiState.Success) {
+            state.animales.find { it.microchip == microchip }
+        } else null
+    }
+
     fun fetchTratamientos(idAnimal: String) {
         viewModelScope.launch {
             try {
