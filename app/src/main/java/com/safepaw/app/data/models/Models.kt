@@ -35,6 +35,14 @@ data class Usuario(
 )
 
 @Serializable
+data class UsuarioRegistro(
+    val nombre: String,
+    val mail: String,
+    val contrasena: String,
+    val codigo_usuario: String
+)
+
+@Serializable
 data class Adopcion(
     val id_adopcion: String = UUID.randomUUID().toString(),
     val id_animal: String,

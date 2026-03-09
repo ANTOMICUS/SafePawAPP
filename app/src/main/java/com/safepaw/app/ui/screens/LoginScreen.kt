@@ -16,8 +16,10 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     viewModel: AuthViewModel = viewModel()
 ) {
+    var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isRegisterMode by remember { mutableStateOf(false) }
     val authState by viewModel.authState.collectAsState()
 
     Column(
@@ -27,9 +29,23 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "SafePaw Login", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = if (isRegisterMode) "Crear cuenta SafePaw" else "SafePaw Login",
+            style = MaterialTheme.typography.headlineMedium
+        )
         
         Spacer(modifier = Modifier.height(32.dp))
+
+        if (isRegisterMode) {
+            OutlinedTextField(
+                value = nombre,
+                onValueChange = { nombre = it },
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         OutlinedTextField(
             value = email,
@@ -51,11 +67,35 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { viewModel.signIn(email, password) },
+            onClick = {
+                if (isRegisterMode) {
+                    viewModel.signUp(nombre, email, password)
+                } else {
+                    viewModel.signIn(email, password)
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
-            enabled = email.isNotEmpty() && password.isNotEmpty()
+            enabled = (if (isRegisterMode) nombre.isNotEmpty() else true) &&
+                    email.isNotEmpty() &&
+                    password.isNotEmpty() &&
+                    authState !is AuthState.Loading
         ) {
-            Text("Iniciar Sesión")
+            Text(if (isRegisterMode) "Crear cuenta" else "Iniciar Sesión")
+        }
+
+        TextButton(
+            onClick = { isRegisterMode = !isRegisterMode }
+        ) {
+            Text(
+                if (isRegisterMode)
+                    "¿Ya tienes cuenta? Inicia sesión"
+                else
+                    "¿No tienes cuenta? Regístrate"
+            )
+        }
+
+        if (authState is AuthState.Loading) {
+            CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp))
         }
 
         if (authState is AuthState.Error) {
