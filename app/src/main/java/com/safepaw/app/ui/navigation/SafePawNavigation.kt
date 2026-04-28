@@ -156,8 +156,11 @@ fun SafePawNavigation(
                     navController = navController,
                     onBack = { 
                         animalViewModel.fetchAnimales()
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.Dashboard.route) { inclusive = true }
+                        val popped = navController.popBackStack(Screen.Dashboard.route, false)
+                        if (!popped) {
+                            navController.navigate(Screen.Dashboard.route) {
+                                popUpTo(Screen.Dashboard.route) { inclusive = true }
+                            }
                         }
                     }
                 )

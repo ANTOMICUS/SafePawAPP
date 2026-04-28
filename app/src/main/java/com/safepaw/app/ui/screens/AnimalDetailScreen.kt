@@ -3,6 +3,7 @@ package com.safepaw.app.ui.screens
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -33,6 +34,9 @@ fun AnimalDetailScreen(
 ) {
     val context = LocalContext.current
     var isEditing by remember { mutableStateOf(false) }
+
+    // Asegura que el gesto/botón físico de "atrás" ejecuta el mismo flujo que el botón de la app.
+    BackHandler { onBack() }
     
     // Estados locales para edición
     var nombre by remember { mutableStateOf(animal.nombre) }
