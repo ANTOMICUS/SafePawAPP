@@ -1,10 +1,13 @@
 package com.safepaw.app.ui.screens
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -65,6 +68,24 @@ fun AnimalDetailScreen(
         }
     }
 
+    val galleryMultiLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetMultipleContents()
+    ) { uris: List<Uri> ->
+        val bytesList = uris.mapNotNull { uri ->
+            context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+        }
+        if (bytesList.isNotEmpty()) {
+            viewModel.addAnimalFotos(animal.id_animal, bytesList)
+        }
+    }
+
+    val fotosMap by viewModel.animalFotos.collectAsState()
+    val fotos = fotosMap[animal.id_animal].orEmpty()
+
+    LaunchedEffect(animal.id_animal) {
+        viewModel.fetchAnimalFotos(animal.id_animal)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -75,6 +96,29 @@ fun AnimalDetailScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = {
+                            val texto = buildString {
+                                appendLine("Perfil de ${nombre.ifBlank { animal.nombre }}")
+                                appendLine("Especie: ${especie.ifBlank { animal.especie }}")
+                                appendLine("Raza: ${raza.ifBlank { animal.raza }}")
+                                appendLine("Estado: ${estado.ifBlank { animal.estado_adopcion }}")
+                                appendLine("Microchip: ${microchip.ifBlank { animal.microchip }}")
+                                if (!fotoUrl.isNullOrBlank()) {
+                                    appendLine()
+                                    appendLine("Foto: $fotoUrl")
+                                }
+                            }
+                            val intent = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(Intent.EXTRA_SUBJECT, "SafePaw - ${nombre.ifBlank { animal.nombre }}")
+                                putExtra(Intent.EXTRA_TEXT, texto)
+                            }
+                            context.startActivity(Intent.createChooser(intent, "Compartir perfil"))
+                        }
+                    ) {
+                        Icon(Icons.Default.Share, contentDescription = "Compartir")
+                    }
                     if (isEditing) {
                         IconButton(onClick = {
                             val updatedAnimal = animal.copy(
@@ -291,6 +335,54 @@ fun AnimalDetailScreen(
                             label = { Text(estado) },
                             modifier = Modifier.padding(top = 6.dp)
                         )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Fotos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Spacer(modifier = Modifier.weight(1f))
+                        if (isEditing) {
+                            FilledTonalIconButton(onClick = { galleryMultiLauncher.launch("image/*") }) {
+                                Icon(Icons.Default.AddPhotoAlternate, contentDescription = "Añadir fotos")
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (fotos.isEmpty()) {
+                        Text(
+                            text = if (isEditing) "Añade fotos adicionales del animal." else "No hay fotos adicionales.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            items(fotos, key = { it.id_foto }) { foto ->
+                                Card(
+                                    modifier = Modifier.size(120.dp),
+                                    shape = MaterialTheme.shapes.medium
+                                ) {
+                                    AsyncImage(
+                                        model = foto.url,
+                                        contentDescription = "Foto",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

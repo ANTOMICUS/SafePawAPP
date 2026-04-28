@@ -1,13 +1,14 @@
 package com.safepaw.app.data.repository
 
 import com.safepaw.app.data.models.Animal
+import com.safepaw.app.data.models.AnimalFoto
 import com.safepaw.app.data.models.Tratamiento
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
-import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -70,6 +71,26 @@ class SupabaseRepository @Inject constructor(
         val bucket = supabaseClient.storage["animal-photos"]
         bucket.upload(fileName, bytes, upsert = true)
         bucket.publicUrl(fileName)
+    }
+
+    suspend fun getAnimalFotos(idAnimal: String): List<AnimalFoto> = withContext(Dispatchers.IO) {
+        supabaseClient.postgrest["animal_fotos"]
+            .select {
+                filter { eq("id_animal", idAnimal) }
+                order("created_at", io.github.jan.supabase.postgrest.query.Order.DESCENDING)
+            }
+            .decodeList<AnimalFoto>()
+    }
+
+    suspend fun uploadAnimalGalleryPhoto(idAnimal: String, bytes: ByteArray): String = withContext(Dispatchers.IO) {
+        val fileName = "$idAnimal/${UUID.randomUUID()}.jpg"
+        val bucket = supabaseClient.storage["animal-photos"]
+        bucket.upload(fileName, bytes, upsert = false)
+        bucket.publicUrl(fileName)
+    }
+
+    suspend fun insertAnimalFoto(foto: AnimalFoto) = withContext(Dispatchers.IO) {
+        supabaseClient.postgrest["animal_fotos"].insert(foto)
     }
 
     suspend fun searchAnimales(

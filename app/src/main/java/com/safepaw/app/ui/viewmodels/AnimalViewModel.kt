@@ -3,6 +3,7 @@ package com.safepaw.app.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.safepaw.app.data.models.Animal
+import com.safepaw.app.data.models.AnimalFoto
 import com.safepaw.app.data.models.Tratamiento
 import com.safepaw.app.data.repository.SupabaseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +29,9 @@ class AnimalViewModel @Inject constructor(
 
     private val _selectedAnimalTratamientos = MutableStateFlow<List<Tratamiento>>(emptyList())
     val selectedAnimalTratamientos: StateFlow<List<Tratamiento>> = _selectedAnimalTratamientos.asStateFlow()
+
+    private val _animalFotos = MutableStateFlow<Map<String, List<AnimalFoto>>>(emptyMap())
+    val animalFotos: StateFlow<Map<String, List<AnimalFoto>>> = _animalFotos.asStateFlow()
 
     init {
         fetchAnimales()
@@ -128,6 +132,36 @@ class AnimalViewModel @Inject constructor(
                 val url = repository.uploadAnimalPhoto(idAnimal, bytes)
                 onComplete(url)
             } catch (e: Exception) {
+                // Manejar error
+            }
+        }
+    }
+
+    fun fetchAnimalFotos(idAnimal: String) {
+        viewModelScope.launch {
+            try {
+                val fotos = repository.getAnimalFotos(idAnimal)
+                _animalFotos.value = _animalFotos.value.toMutableMap().apply { put(idAnimal, fotos) }
+            } catch (_: Exception) {
+                // Silencioso: la galería es secundaria
+            }
+        }
+    }
+
+    fun addAnimalFotos(idAnimal: String, bytesList: List<ByteArray>) {
+        viewModelScope.launch {
+            try {
+                bytesList.forEach { bytes ->
+                    val url = repository.uploadAnimalGalleryPhoto(idAnimal, bytes)
+                    repository.insertAnimalFoto(
+                        AnimalFoto(
+                            id_animal = idAnimal,
+                            url = url
+                        )
+                    )
+                }
+                fetchAnimalFotos(idAnimal)
+            } catch (_: Exception) {
                 // Manejar error
             }
         }

@@ -51,3 +51,11 @@ data class Adopcion(
     val id_usuario: String,
     val estado: String
 )
+
+@Serializable
+data class AnimalFoto(
+    val id_foto: String = UUID.randomUUID().toString(),
+    val id_animal: String,
+    val url: String,
+    val created_at: String? = null
+)
