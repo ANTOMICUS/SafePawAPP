@@ -47,13 +47,25 @@ class AnimalViewModel @Inject constructor(
 
     fun searchByMicrochip(microchip: String) {
         viewModelScope.launch {
-            _uiState.value = AnimalUiState.Loading
             try {
                 val animal = repository.getAnimalByMicrochip(microchip)
                 if (animal != null) {
-                    _uiState.value = AnimalUiState.Success(listOf(animal))
+                    val current = _uiState.value
+                    if (current is AnimalUiState.Success) {
+                        // No machacamos la lista existente: actualizamos o añadimos el animal encontrado.
+                        val updated = current.animales.toMutableList()
+                        val idx = updated.indexOfFirst { it.id_animal == animal.id_animal || it.microchip == microchip }
+                        if (idx >= 0) updated[idx] = animal else updated.add(animal)
+                        _uiState.value = AnimalUiState.Success(updated)
+                    } else {
+                        _uiState.value = AnimalUiState.Success(listOf(animal))
+                    }
                 } else {
-                    _uiState.value = AnimalUiState.Error("No se encontró ningún animal con ese microchip")
+                    // Si no se encuentra, no destruimos la lista anterior si existía.
+                    val current = _uiState.value
+                    if (current !is AnimalUiState.Success) {
+                        _uiState.value = AnimalUiState.Error("No se encontró ningún animal con ese microchip")
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.value = AnimalUiState.Error(e.message ?: "Error en la búsqueda")
