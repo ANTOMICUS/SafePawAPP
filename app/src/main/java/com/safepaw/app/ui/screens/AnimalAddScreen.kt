@@ -39,7 +39,7 @@ fun AnimalAddScreen(
     var edad by remember { mutableStateOf("") }
     var vacunasAlDia by remember { mutableStateOf(false) }
     var microchip by remember { mutableStateOf("") }
-    val estados = remember { listOf("Disponible", "En Adopción", "Adoptado", "Urgente") }
+    val estados = remember { listOf("Apadrinar", "En Adopción", "Adoptado", "Urgente") }
     var estado by remember { mutableStateOf(estados.first()) }
     var estadoExpanded by remember { mutableStateOf(false) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }

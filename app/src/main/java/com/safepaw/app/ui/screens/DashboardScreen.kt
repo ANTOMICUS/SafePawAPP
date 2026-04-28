@@ -177,7 +177,7 @@ fun FilterDialog(
     var estado by remember { mutableStateOf(currentEstado) }
 
     val especies = listOf("Todos", "Perro", "Gato", "Otro")
-    val estados = listOf("Todos", "Disponible", "En Adopción", "Adoptado", "Urgente")
+    val estados = listOf("Todos", "Apadrinar", "En Adopción", "Adoptado", "Urgente")
 
     AlertDialog(
         onDismissRequest = onDismiss,
