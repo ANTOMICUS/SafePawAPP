@@ -48,6 +48,8 @@ fun AnimalDetailScreen(
     var estado by remember { mutableStateOf(animal.estado_adopcion) }
     var microchip by remember { mutableStateOf(animal.microchip) }
     var fotoUrl by remember { mutableStateOf(animal.foto_url) }
+    val estados = remember { listOf("Apadrinar", "En Adopción", "Adoptado", "Urgente") }
+    var estadoExpanded by remember { mutableStateOf(false) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -251,13 +253,38 @@ fun AnimalDetailScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("Estado de adopción", style = MaterialTheme.typography.labelLarge)
                     if (isEditing) {
-                        OutlinedTextField(
-                            value = estado,
-                            onValueChange = { estado = it },
+                        ExposedDropdownMenuBox(
+                            expanded = estadoExpanded,
+                            onExpandedChange = { estadoExpanded = !estadoExpanded },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 6.dp)
-                        )
+                        ) {
+                            OutlinedTextField(
+                                value = estado,
+                                onValueChange = {},
+                                readOnly = true,
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = estadoExpanded) },
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth(),
+                                singleLine = true
+                            )
+                            ExposedDropdownMenu(
+                                expanded = estadoExpanded,
+                                onDismissRequest = { estadoExpanded = false }
+                            ) {
+                                estados.forEach { opcion ->
+                                    DropdownMenuItem(
+                                        text = { Text(opcion) },
+                                        onClick = {
+                                            estado = opcion
+                                            estadoExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     } else {
                         AssistChip(
                             onClick = {},
