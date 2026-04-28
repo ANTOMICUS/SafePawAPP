@@ -6,11 +6,13 @@ import com.safepaw.app.data.models.UsuarioRegistro
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.SessionStatus
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -29,6 +31,25 @@ class AuthViewModel @Inject constructor(
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
+
+    init {
+        // Mantener el estado de auth sincronizado con la sesión persistida de Supabase.
+        viewModelScope.launch {
+            supabaseClient.auth.sessionStatus.collect { status ->
+                when (status) {
+                    SessionStatus.LoadingFromStorage -> _authState.value = AuthState.Loading
+                    is SessionStatus.Authenticated -> _authState.value = AuthState.Authenticated
+                    is SessionStatus.NotAuthenticated -> _authState.value = AuthState.Idle
+                    SessionStatus.NetworkError -> {
+                        // Si falla red, no forzamos logout: mantenemos Idle (o el último estado) sin romper flujo.
+                        if (_authState.value !is AuthState.Authenticated) {
+                            _authState.value = AuthState.Idle
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     fun signIn(email: String, pass: String) {
         viewModelScope.launch {

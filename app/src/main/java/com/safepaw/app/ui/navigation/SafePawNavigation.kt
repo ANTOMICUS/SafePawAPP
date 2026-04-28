@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,6 +17,7 @@ import com.safepaw.app.ui.screens.*
 import com.safepaw.app.ui.viewmodels.AnimalUiState
 import com.safepaw.app.ui.viewmodels.AnimalViewModel
 import com.safepaw.app.ui.viewmodels.AuthViewModel
+import com.safepaw.app.ui.viewmodels.AuthState
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")
@@ -36,8 +38,44 @@ fun SafePawNavigation(
     animalViewModel: AnimalViewModel
 ) {
     val navController = rememberNavController()
+    val authState by authViewModel.authState.collectAsState()
 
-    NavHost(navController = navController, startDestination = Screen.Login.route) {
+    if (authState is AuthState.Loading) {
+        Box(modifier = androidx.compose.ui.Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val startDestination = if (authState is AuthState.Authenticated) {
+        Screen.Dashboard.route
+    } else {
+        Screen.Login.route
+    }
+
+    LaunchedEffect(authState) {
+        when (authState) {
+            is AuthState.Authenticated -> {
+                if (navController.currentDestination?.route == Screen.Login.route) {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            }
+
+            AuthState.Idle -> {
+                if (navController.currentDestination?.route != Screen.Login.route) {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(0)
+                    }
+                }
+            }
+
+            else -> Unit
+        }
+    }
+
+    NavHost(navController = navController, startDestination = startDestination) {
         
         // 1. Pantalla de Login
         composable(Screen.Login.route) {
@@ -63,6 +101,12 @@ fun SafePawNavigation(
                 },
                 onAddClick = {
                     navController.navigate(Screen.AnimalAdd.route)
+                },
+                onLogout = {
+                    authViewModel.signOut()
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Dashboard.route) { inclusive = true }
+                    }
                 }
             )
         }

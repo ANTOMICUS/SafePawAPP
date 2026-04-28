@@ -82,7 +82,16 @@ class AnimalViewModel @Inject constructor(
     fun upsertAnimal(animal: Animal) {
         viewModelScope.launch {
             try {
-                repository.insertAnimal(animal)
+                val current = _uiState.value
+                val exists = (current as? AnimalUiState.Success)
+                    ?.animales
+                    ?.any { it.id_animal == animal.id_animal } == true
+
+                if (exists) {
+                    repository.updateAnimal(animal)
+                } else {
+                    repository.insertAnimal(animal)
+                }
                 fetchAnimales()
             } catch (e: Exception) {
                 _uiState.value = AnimalUiState.Error("Error al guardar animal")

@@ -24,7 +24,8 @@ fun DashboardScreen(
     viewModel: AnimalViewModel,
     onAnimalClick: (Animal) -> Unit,
     onScanClick: () -> Unit,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -62,6 +63,15 @@ fun DashboardScreen(
                                 showFilterDialog = true
                             },
                             leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) }
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        DropdownMenuItem(
+                            text = { Text("Cerrar sesión") },
+                            onClick = {
+                                showMenu = false
+                                onLogout()
+                            },
+                            leadingIcon = { Icon(Icons.Default.Logout, contentDescription = null) }
                         )
                     }
                 }
