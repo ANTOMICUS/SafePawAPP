@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.safepaw.app.data.models.Animal
@@ -103,12 +104,11 @@ fun AnimalDetailScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Foto de Perfil
+            // Cabecera: foto + nombre
             Box(
                 modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape)
-                    .padding(8.dp),
+                    .size(140.dp)
+                    .clip(CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 if (fotoUrl != null) {
@@ -119,111 +119,195 @@ fun AnimalDetailScreen(
                         contentScale = ContentScale.Crop
                     )
                 } else {
-                    Icon(
-                        Icons.Default.Pets,
-                        contentDescription = null,
-                        modifier = Modifier.size(80.dp),
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = CircleShape
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Default.Pets,
+                                contentDescription = null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                 }
-                
+
                 if (isEditing) {
-                    IconButton(
+                    FilledIconButton(
                         onClick = { galleryLauncher.launch("image/*") },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
-                            .clip(CircleShape)
-                            .padding(4.dp)
+                            .padding(6.dp)
+                            .size(40.dp)
                     ) {
                         Icon(Icons.Default.PhotoCamera, contentDescription = "Cambiar foto")
                     }
                 }
             }
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = nombre.ifBlank { "Sin nombre" },
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = microchip.ifBlank { "Sin microchip" },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            DetailField(label = "Nombre", value = nombre, isEditing = isEditing, onValueChange = { nombre = it })
-            DetailField(label = "Especie", value = especie, isEditing = isEditing, onValueChange = { especie = it })
-            DetailField(label = "Raza", value = raza, isEditing = isEditing, onValueChange = { raza = it })
-            DetailField(label = "Peso (kg)", value = peso, isEditing = isEditing, onValueChange = { peso = it })
-            DetailField(label = "Edad", value = edad, isEditing = isEditing, onValueChange = { edad = it })
-            
-            Row(
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Text("Vacunas al día", style = MaterialTheme.typography.labelLarge, modifier = Modifier.weight(1f))
-                if (isEditing) {
-                    Switch(checked = vacunasAlDia, onCheckedChange = { vacunasAlDia = it })
-                } else {
-                    Text(if (vacunasAlDia) "Sí" else "No", style = MaterialTheme.typography.bodyLarge)
-                }
-            }
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Datos", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(12.dp))
 
-            DetailField(label = "Microchip", value = microchip, isEditing = isEditing, onValueChange = { microchip = it })
-
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Text("Estado de Adopción", style = MaterialTheme.typography.labelLarge)
-            if (isEditing) {
-                OutlinedTextField(
-                    value = estado,
-                    onValueChange = { estado = it },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
-                    ),
-                    modifier = Modifier.padding(vertical = 8.dp)
-                ) {
-                    Text(
-                        text = estado,
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge
+                    LabeledField(
+                        label = "Nombre",
+                        value = nombre,
+                        isEditing = isEditing,
+                        onValueChange = { nombre = it }
                     )
+                    LabeledField(
+                        label = "Especie",
+                        value = especie,
+                        isEditing = isEditing,
+                        onValueChange = { especie = it }
+                    )
+                    LabeledField(
+                        label = "Raza",
+                        value = raza,
+                        isEditing = isEditing,
+                        onValueChange = { raza = it }
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            LabeledField(
+                                label = "Peso (kg)",
+                                value = peso,
+                                isEditing = isEditing,
+                                onValueChange = { peso = it }
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            LabeledField(
+                                label = "Edad",
+                                value = edad,
+                                isEditing = isEditing,
+                                onValueChange = { edad = it }
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text("Vacunas al día", style = MaterialTheme.typography.labelLarge)
+                            Text(
+                                text = if (vacunasAlDia) "Sí" else "No",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (isEditing) {
+                            Switch(checked = vacunasAlDia, onCheckedChange = { vacunasAlDia = it })
+                        } else {
+                            AssistChip(
+                                onClick = {},
+                                label = { Text(if (vacunasAlDia) "Sí" else "No") }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LabeledField(
+                        label = "Microchip",
+                        value = microchip,
+                        isEditing = isEditing,
+                        onValueChange = { microchip = it }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Estado de adopción", style = MaterialTheme.typography.labelLarge)
+                    if (isEditing) {
+                        OutlinedTextField(
+                            value = estado,
+                            onValueChange = { estado = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 6.dp)
+                        )
+                    } else {
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(estado) },
+                            modifier = Modifier.padding(top = 6.dp)
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Divider()
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Text("Historial Médico", style = MaterialTheme.typography.headlineSmall)
-            
-            Button(
-                onClick = { 
-                    navController.navigate(Screen.MedicalHistory.createRoute(animal.id_animal, animal.nombre))
-                },
-                modifier = Modifier.padding(top = 8.dp)
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
-                Text("Ver / Editar Historial Médico")
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Historial Médico", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = {
+                            navController.navigate(Screen.MedicalHistory.createRoute(animal.id_animal, animal.nombre))
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Ver / Editar historial")
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun DetailField(
+private fun LabeledField(
     label: String,
     value: String,
     isEditing: Boolean,
     onValueChange: (String) -> Unit
 ) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.padding(vertical = 6.dp)) {
         Text(text = label, style = MaterialTheme.typography.labelLarge)
         if (isEditing) {
             OutlinedTextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp),
+                singleLine = true
             )
         } else {
             Text(
-                text = value,
+                text = value.ifBlank { "-" },
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 4.dp)
             )
