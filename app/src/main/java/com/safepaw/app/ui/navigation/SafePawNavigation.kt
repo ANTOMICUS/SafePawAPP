@@ -155,6 +155,7 @@ fun SafePawNavigation(
                     viewModel = animalViewModel,
                     navController = navController,
                     onBack = { 
+                        animalViewModel.fetchAnimales()
                         navController.navigate(Screen.Dashboard.route) {
                             popUpTo(Screen.Dashboard.route) { inclusive = true }
                         }
