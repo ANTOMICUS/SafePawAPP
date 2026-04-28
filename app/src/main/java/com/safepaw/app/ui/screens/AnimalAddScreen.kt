@@ -39,7 +39,9 @@ fun AnimalAddScreen(
     var edad by remember { mutableStateOf("") }
     var vacunasAlDia by remember { mutableStateOf(false) }
     var microchip by remember { mutableStateOf("") }
-    var estado by remember { mutableStateOf("Disponible") }
+    val estados = remember { listOf("Disponible", "En Adopción", "Adoptado", "Urgente") }
+    var estado by remember { mutableStateOf(estados.first()) }
+    var estadoExpanded by remember { mutableStateOf(false) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
@@ -204,12 +206,38 @@ fun AnimalAddScreen(
                 Switch(checked = vacunasAlDia, onCheckedChange = { vacunasAlDia = it })
             }
 
-            OutlinedTextField(
-                value = estado,
-                onValueChange = { estado = it },
-                label = { Text("Estado de Adopción") },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
-            )
+            ExposedDropdownMenuBox(
+                expanded = estadoExpanded,
+                onExpandedChange = { estadoExpanded = !estadoExpanded },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
+                OutlinedTextField(
+                    value = estado,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Estado de Adopción") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = estadoExpanded) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = estadoExpanded,
+                    onDismissRequest = { estadoExpanded = false }
+                ) {
+                    estados.forEach { opcion ->
+                        DropdownMenuItem(
+                            text = { Text(opcion) },
+                            onClick = {
+                                estado = opcion
+                                estadoExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
             
