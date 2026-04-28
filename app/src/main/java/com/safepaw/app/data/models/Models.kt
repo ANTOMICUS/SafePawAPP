@@ -38,6 +38,7 @@ data class Usuario(
 data class UsuarioRegistro(
     val id_usuario: String,
     val nombre: String,
+    val rol: String,
     val mail: String,
     val contrasena: String,
     val codigo_usuario: String

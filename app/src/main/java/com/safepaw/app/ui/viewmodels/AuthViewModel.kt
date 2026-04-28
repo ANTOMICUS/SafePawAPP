@@ -66,6 +66,7 @@ class AuthViewModel @Inject constructor(
                 val usuarioRegistro = UsuarioRegistro(
                     id_usuario = userId,
                     nombre = nombre,
+                    rol = "Voluntario",
                     mail = email,
                     contrasena = hashPassword(pass),
                     codigo_usuario = codigoUsuario
