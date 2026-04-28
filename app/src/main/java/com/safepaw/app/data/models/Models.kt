@@ -36,6 +36,7 @@ data class Usuario(
 
 @Serializable
 data class UsuarioRegistro(
+    val id_usuario: String,
     val nombre: String,
     val mail: String,
     val contrasena: String,

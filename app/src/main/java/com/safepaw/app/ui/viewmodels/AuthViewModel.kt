@@ -49,12 +49,22 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             try {
-                supabaseClient.auth.signUpWith(Email) {
+                val user = supabaseClient.auth.signUpWith(Email) {
                     this.email = email
                     password = pass
                 }
+                // Nota supabase-kt: si "Confirm email" está desactivado, signUpWith() puede devolver null
+                // porque te autentica directamente. En ese caso, el id viene en la sesión/usuario actual.
+                val userId = user?.id
+                    ?: supabaseClient.auth.currentSessionOrNull()?.user?.id
+                    ?: supabaseClient.auth.currentUserOrNull()?.id
+                    ?: throw IllegalStateException(
+                        "No se pudo obtener el id del usuario de Supabase. " +
+                            "Revisa si 'Confirm email' está activado y si el registro ha completado correctamente."
+                    )
                 val codigoUsuario = generateUserCode()
                 val usuarioRegistro = UsuarioRegistro(
+                    id_usuario = userId,
                     nombre = nombre,
                     mail = email,
                     contrasena = hashPassword(pass),
