@@ -81,9 +81,11 @@ fun AnimalDetailScreen(
 
     val fotosMap by viewModel.animalFotos.collectAsState()
     val fotos = fotosMap[animal.id_animal].orEmpty()
+    val tratamientos by viewModel.selectedAnimalTratamientos.collectAsState()
 
     LaunchedEffect(animal.id_animal) {
         viewModel.fetchAnimalFotos(animal.id_animal)
+        viewModel.fetchTratamientos(animal.id_animal)
     }
 
     Scaffold(
@@ -99,22 +101,46 @@ fun AnimalDetailScreen(
                     IconButton(
                         onClick = {
                             val texto = buildString {
-                                appendLine("Perfil de ${nombre.ifBlank { animal.nombre }}")
-                                appendLine("Especie: ${especie.ifBlank { animal.especie }}")
-                                appendLine("Raza: ${raza.ifBlank { animal.raza }}")
-                                appendLine("Estado: ${estado.ifBlank { animal.estado_adopcion }}")
-                                appendLine("Microchip: ${microchip.ifBlank { animal.microchip }}")
+                                appendLine("🐾 Perfil de ${nombre.ifBlank { animal.nombre }} 🐾")
+                                appendLine("----------------------------------")
+                                appendLine("🔹 Especie: ${especie.ifBlank { animal.especie }}")
+                                appendLine("🔹 Raza: ${raza.ifBlank { animal.raza }}")
+                                appendLine("🔹 Peso: ${peso.ifBlank { animal.peso }} kg")
+                                appendLine("🔹 Edad: ${edad.ifBlank { animal.edad }}")
+                                appendLine("🔹 Estado: ${estado.ifBlank { animal.estado_adopcion }}")
+                                appendLine("🔹 Microchip: ${microchip.ifBlank { animal.microchip }}")
+                                appendLine("🔹 Vacunas al día: ${if (vacunasAlDia) "Sí ✅" else "No ❌"}")
+                                
                                 if (!fotoUrl.isNullOrBlank()) {
                                     appendLine()
-                                    appendLine("Foto: $fotoUrl")
+                                    appendLine("📸 Foto de perfil: $fotoUrl")
                                 }
+
+                                if (fotos.isNotEmpty()) {
+                                    appendLine()
+                                    appendLine("🖼️ Galería de fotos:")
+                                    fotos.forEachIndexed { index, foto ->
+                                        appendLine("${index + 1}. ${foto.url}")
+                                    }
+                                }
+
+                                if (tratamientos.isNotEmpty()) {
+                                    appendLine()
+                                    appendLine("🏥 Historial Médico:")
+                                    tratamientos.take(5).forEach { t ->
+                                        appendLine("- ${t.fecha.take(10)}: ${t.tipo} (${t.descripcion})")
+                                    }
+                                    if (tratamientos.size > 5) appendLine("- ... (más en la app)")
+                                }
+                                appendLine("----------------------------------")
+                                appendLine("Compartido desde SafePaw App")
                             }
                             val intent = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain"
-                                putExtra(Intent.EXTRA_SUBJECT, "SafePaw - ${nombre.ifBlank { animal.nombre }}")
+                                putExtra(Intent.EXTRA_SUBJECT, "SafePaw - Perfil de ${nombre.ifBlank { animal.nombre }}")
                                 putExtra(Intent.EXTRA_TEXT, texto)
                             }
-                            context.startActivity(Intent.createChooser(intent, "Compartir perfil"))
+                            context.startActivity(Intent.createChooser(intent, "Compartir perfil completo"))
                         }
                     ) {
                         Icon(Icons.Default.Share, contentDescription = "Compartir")
