@@ -81,13 +81,12 @@ fun DashboardScreen(
             """.trimIndent()
         }
 
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            action = Intent.ACTION_SEND
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, docTitle)
-            putExtra(Intent.EXTRA_TEXT, docContent)
-        }
-        context.startActivity(Intent.createChooser(shareIntent, "Enviar $docTitle"))
+        val intentToSend = Intent(Intent.ACTION_SEND)
+        intentToSend.type = "text/plain"
+        intentToSend.putExtra(Intent.EXTRA_SUBJECT, docTitle)
+        intentToSend.putExtra(Intent.EXTRA_TEXT, docContent)
+        
+        context.startActivity(Intent.createChooser(intentToSend, "Enviar $docTitle"))
     }
 
     Scaffold(
