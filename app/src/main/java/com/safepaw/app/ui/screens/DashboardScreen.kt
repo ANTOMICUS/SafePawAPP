@@ -40,8 +40,8 @@ fun DashboardScreen(
     var selectedEstado by remember { mutableStateOf("Todos") }
 
     fun shareDocument(type: String) {
-        val title = if (type == "Adopción") "Contrato de Adopción" else "Contrato de Apadrinamiento"
-        val content = if (type == "Adopción") {
+        val docTitle = if (type == "Adopción") "Contrato de Adopción" else "Contrato de Apadrinamiento"
+        val docContent = if (type == "Adopción") {
             """
             📄 CONTRATO DE ADOPCIÓN - SAFE PAW 🐾
             ------------------------------------
@@ -82,11 +82,12 @@ fun DashboardScreen(
         }
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            action = Intent.ACTION_SEND
             type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, title)
-            putExtra(Intent.EXTRA_TEXT, content)
+            putExtra(Intent.EXTRA_SUBJECT, docTitle)
+            putExtra(Intent.EXTRA_TEXT, docContent)
         }
-        context.startActivity(Intent.createChooser(shareIntent, "Enviar $title"))
+        context.startActivity(Intent.createChooser(shareIntent, "Enviar $docTitle"))
     }
 
     Scaffold(
