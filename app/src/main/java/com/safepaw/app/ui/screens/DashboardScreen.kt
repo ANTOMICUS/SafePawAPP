@@ -1,5 +1,6 @@
 package com.safepaw.app.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.safepaw.app.data.models.Animal
@@ -27,6 +29,7 @@ fun DashboardScreen(
     onAddClick: () -> Unit,
     onLogout: () -> Unit
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var showMenu by remember { mutableStateOf(false) }
@@ -35,6 +38,56 @@ fun DashboardScreen(
     // Filtros actuales
     var selectedEspecie by remember { mutableStateOf("Todos") }
     var selectedEstado by remember { mutableStateOf("Todos") }
+
+    fun shareDocument(type: String) {
+        val title = if (type == "Adopción") "Contrato de Adopción" else "Contrato de Apadrinamiento"
+        val content = if (type == "Adopción") {
+            """
+            📄 CONTRATO DE ADOPCIÓN - SAFE PAW 🐾
+            ------------------------------------
+            Por el presente documento, el adoptante se compromete a:
+            1. Proporcionar cuidados veterinarios, alimentación y refugio.
+            2. No abandonar, maltratar ni ceder al animal sin previo aviso.
+            3. Mantener el microchip y vacunas al día.
+            
+            DATOS DEL ADOPTANTE:
+            Nombre: __________________________
+            DNI: _____________________________
+            Dirección: ________________________
+            Teléfono: _________________________
+            
+            Firma: ___________________________
+            ------------------------------------
+            Enviado desde SafePaw App
+            """.trimIndent()
+        } else {
+            """
+            📄 CONTRATO DE APADRINAMIENTO - SAFE PAW 🐾
+            ------------------------------------
+            Por el presente documento, el padrino/madrina se compromete a:
+            1. Contribuir mensualmente al bienestar del animal apadrinado.
+            2. Recibir actualizaciones periódicas sobre su estado.
+            3. Visitar al animal bajo coordinación del centro.
+            
+            DATOS DEL PADRINO/MADRINA:
+            Nombre: __________________________
+            DNI: _____________________________
+            Email: ___________________________
+            Cuota mensual: ___________________
+            
+            Firma: ___________________________
+            ------------------------------------
+            Enviado desde SafePaw App
+            """.trimIndent()
+        }
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, title)
+            putExtra(Intent.EXTRA_TEXT, content)
+        }
+        context.startActivity(Intent.createChooser(intent, "Enviar $title"))
+    }
 
     Scaffold(
         topBar = {
@@ -63,6 +116,23 @@ fun DashboardScreen(
                                 showFilterDialog = true
                             },
                             leadingIcon = { Icon(Icons.Default.FilterList, contentDescription = null) }
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        DropdownMenuItem(
+                            text = { Text("Documento Adopción") },
+                            onClick = {
+                                showMenu = false
+                                shareDocument("Adopción")
+                            },
+                            leadingIcon = { Icon(Icons.Default.Description, contentDescription = null) }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Documento Apadrinar") },
+                            onClick = {
+                                showMenu = false
+                                shareDocument("Apadrinar")
+                            },
+                            leadingIcon = { Icon(Icons.Default.VolunteerActivism, contentDescription = null) }
                         )
                         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                         DropdownMenuItem(
