@@ -1,51 +1,63 @@
-# SafePaw 🐾 - Gestión Integral de Protectoras de Animales
+# SafePaw - App de Gestión de Refugios
 
-SafePaw es una aplicación móvil moderna desarrollada para optimizar la gestión diaria de refugios y protectoras de animales. Permite un control exhaustivo de los registros de animales, su historial médico y la gestión de adopciones/apadrinamientos, todo sincronizado en tiempo real.
+SafePaw es una aplicación Android profesional diseñada para la gestión eficiente de animales en refugios, utilizando un stack tecnológico moderno y escalable.
 
-## 🚀 Características Principales
-
-- **Gestión de Perfiles**: Registro manual completo (raza, peso, edad, microchip, vacunas).
-- **Galería Multimedia**: Subida de fotos de perfil y fotos adicionales directamente a Supabase Storage.
-- **Historial Médico**: Registro detallado de tratamientos e intervenciones con descripción y duración.
-- **Búsqueda Avanzada**: Filtros por especie, estado de adopción y búsqueda por chip o nombre.
-- **Escáner de Microchip**: Integración con cámara para detección rápida de animales registrados.
-- **Documentación Dinámica**: Generación y envío de contratos de adopción y apadrinamiento.
-- **Compartir Perfiles**: Función para compartir el perfil completo (datos + fotos + historial) a través de apps externas.
-
-## 🛠️ Tecnologías Utilizadas
-
-- **Lenguaje**: [Kotlin](https://kotlinlang.org/)
-- **Interfaz**: [Jetpack Compose](https://developer.android.com/jetpack/compose) con Material 3
-- **Backend**: [Supabase](https://supabase.com/) (PostgreSQL, Auth & Storage)
-- **Inyección de Dependencias**: [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
-- **Carga de Imágenes**: [Coil](https://coil-kt.github.io/coil/)
-- **Escaneo**: [Google ML Kit](https://developers.google.com/ml-kit/vision/barcode-scanning)
-- **Cámara**: [CameraX](https://developer.android.com/jetpack/androidx/releases/camera)
-
-## 📦 Estructura del Proyecto
-
-El código sigue una arquitectura **MVVM** (Model-View-ViewModel) organizada de la siguiente manera:
-
-- `data/`: Modelos de datos y repositorios de Supabase.
-- `di/`: Módulos de inyección de dependencias (Hilt).
-- `ui/`: 
-  - `screens/`: Todas las pantallas de la aplicación (Dashboard, Detail, Add, etc.).
-  - `viewmodels/`: Lógica de negocio y gestión de estados.
-  - `theme/`: Configuración de colores y estilos.
-- `navigation/`: Configuración del flujo de navegación entre pantallas.
-
-## ⚙️ Configuración del Backend (Supabase)
-
-Para que la aplicación funcione correctamente, es necesario configurar las siguientes tablas en Supabase:
-
-1. **Tabla `animales`**: Datos básicos y técnicos.
-2. **Tabla `tratamientos`**: Historial médico.
-3. **Tabla `animal_fotos`**: Galería de imágenes adicionales.
-4. **Storage**: Bucket público llamado `animal-photos`.
-
-## 📄 Licencia
-
-Este proyecto ha sido desarrollado como parte del Trabajo de Fin de Ciclo (TFC) para el grado de Desarrollo de Aplicaciones Multiplataforma (DAM).
+## 🚀 Stack Tecnológico
+- **Lenguaje:** Kotlin
+- **UI:** Jetpack Compose (Arquitectura MVVM)
+- **Backend:** Supabase (Auth, PostgreSQL, Storage)
+- **Inyección de Dependencias:** Hilt
+- **Escaneo:** CameraX + ML Kit
 
 ---
-Desarrollado con ❤️ para el bienestar animal.
+
+## 🛠️ Guía de Configuración Inicial
+
+### 1. Configuración de Supabase
+Para que la app funcione, debes tener un proyecto en [Supabase](https://supabase.com/).
+1. **Base de Datos:** Ejecuta el script SQL de creación de tablas (`animales`, `tratamientos`, `usuarios`) en el editor SQL de Supabase.
+2. **Credenciales:** Copia tu `Project URL` y `API Key` en el archivo:
+   `app/src/main/java/com/safepaw/app/di/NetworkModule.kt`
+
+### 2. Autenticación
+La app utiliza **Supabase Auth**. Para acceder por primera vez:
+1. Ve a **Authentication > Users** en tu panel de Supabase.
+2. Crea un usuario manualmente (Email y Contraseña).
+3. Asegúrate de que el usuario esté confirmado o desactiva "Confirm Email" en la configuración del proveedor.
+
+---
+
+## 📱 Guía de Uso de la Aplicación
+
+### 1. Inicio de Sesión
+- Al abrir la app, introduce las credenciales creadas en el paso anterior.
+- Si el login es exitoso, serás redirigido al **Dashboard**.
+
+### 2. Dashboard (Panel Principal)
+- **Lista de Animales:** Visualiza todos los animales registrados.
+- **Buscador:** Filtra animales introduciendo el número de **microchip** (mínimo 5 caracteres).
+- **Escáner (FAB):** Pulsa el botón flotante "Scan" para abrir la cámara.
+
+### 3. Módulo de Escaneo
+- Apunta la cámara al código de barras del microchip del animal.
+- ML Kit detectará el código automáticamente y te redirigirá a la **Ficha Técnica** del animal encontrado.
+
+### 4. Ficha Técnica y Edición (CRUD)
+- **Visualización:** Consulta nombre, especie y estado de adopción.
+- **Edición:** Pulsa el icono del **Lápiz** para modificar los datos. Pulsa el **Disco (Save)** para sincronizar los cambios con Supabase.
+- **Historial Médico:** Pulsa "Ver Tratamientos" para acceder al registro clínico.
+
+### 5. Historial Médico y Roles
+- Los usuarios con rol de **Veterinario (Vet)** o **Gestor** pueden añadir nuevos tratamientos pulsando el botón "+".
+- El historial se guarda de forma inmutable y cronológica en la base de datos.
+
+### 6. Generación de Contratos
+- Dentro de la ficha del animal, puedes generar un **Contrato de Adopción en PDF**.
+- El archivo se guardará automáticamente en la carpeta de Documentos de tu dispositivo.
+
+---
+
+## ⚠️ Solución de Problemas Comunes
+- **Pantalla en blanco:** Asegúrate de haber hecho "Sync Project with Gradle Files" y que las credenciales de Supabase sean correctas.
+- **Error de Cámara:** Verifica que has aceptado los permisos de cámara en el dispositivo.
+- **Error de Red:** Comprueba que el emulador o móvil tiene acceso a internet (Supabase requiere HTTPS).
